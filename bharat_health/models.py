@@ -147,7 +147,7 @@ class Doctors(models.Model):
     gmail = models.CharField(unique=True, max_length=100)
     password = models.CharField(max_length=255)
     phone_no = models.CharField(unique=True, max_length=15)
-    token = models.CharField(unique=True, max_length=255, blank=True, null=True)
+    token = models.CharField(max_length=255, unique=True, null=True, blank=True)
 
     class Meta:
         managed = False
@@ -189,8 +189,7 @@ class Patients(models.Model):
     gmail = models.CharField(unique=True, max_length=100)
     password = models.CharField(max_length=255)
     phone_no = models.CharField(unique=True, max_length=15)
-    token = models.CharField(unique=True, max_length=255, blank=True, null=True)
-
+    token = models.CharField(max_length=255, unique=True, null=True, blank=True)
     class Meta:
         managed = False
         db_table = 'patients'
@@ -226,3 +225,14 @@ class TestRequests(models.Model):
     class Meta:
         managed = False
         db_table = 'test_requests'
+
+
+class PermissionPatientDoctor(models.Model):
+    patient = models.ForeignKey(Patients, on_delete=models.CASCADE)
+    doctor = models.ForeignKey(Doctors, on_delete=models.CASCADE)
+    is_allowed = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('patient', 'doctor')
+        db_table="permission_patient_doctor"
+        managed=False

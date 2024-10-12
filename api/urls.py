@@ -1,8 +1,22 @@
 from rest_framework.routers import DefaultRouter
-from .viewset import *
-from django.urls import path,include
-router=DefaultRouter()
-router.register(r'medical-report',MedicalReportViewset,basename='medical')
+from django.urls import path, include
+from .patient_viewset import *
+from .doctor_viewset import *
+from .viewsets import *
+
+patient_router = DefaultRouter()
+patient_router.register(r'medical-report', PatientMedicalReportViewset, basename='medical-report')
+patient_router.register(r'appointments', PatientAppointmentViewset, basename='patient-appointment')
+
+doctor_router = DefaultRouter()
+doctor_router.register(r'medical-report', DoctorMedicalReportViewset, basename='medical-report')
+doctor_router.register(r'appointments', DoctorAppointmentViewset, basename='doctor-appointment')
+
+router = DefaultRouter()
+router.register(r'appointments', AppointmentViewset, basename='appointment')
+
 urlpatterns = [
-    path('',include(router.urls))
+    path('patient/', include(patient_router.urls)),
+    path('doctor/', include(doctor_router.urls)),
+    path('', include(router.urls)),
 ]
