@@ -140,15 +140,21 @@ class DjangoSession(models.Model):
 
 class Doctors(models.Model):
     doctor_id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=100)
+    first_name=models.CharField(max_length=100)
+    middle_name=models.CharField(max_length=100)
+    last_name=models.CharField(max_length=100)
     age = models.IntegerField(blank=True, null=True)
     sex = models.CharField(max_length=6)
-    location = models.CharField(max_length=255, blank=True, null=True)
+    dob=models.DateField()
+    primary_address=models.CharField(max_length=255,blank=True,null=True)
+    secondary_address=models.CharField(max_length=255,blank=True,null=True)
+    state= models.CharField(max_length=255, blank=True, null=True)
+    city=models.CharField(max_length=255,blank=True,null=True)
+    pin_code=models.IntegerField(blank=True,null=True)
     gmail = models.CharField(unique=True, max_length=100)
     password = models.CharField(max_length=255)
     phone_no = models.CharField(unique=True, max_length=15)
     token = models.CharField(max_length=255, unique=True, null=True, blank=True)
-
     class Meta:
         managed = False
         db_table = 'doctors'
@@ -182,10 +188,17 @@ class MedicalPrescriptions(models.Model):
 
 class Patients(models.Model):
     patient_id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=100)
+    first_name=models.CharField(max_length=100)
+    middle_name=models.CharField(max_length=100)
+    last_name=models.CharField(max_length=100)
     age = models.IntegerField(blank=True, null=True)
     sex = models.CharField(max_length=6)
-    location = models.CharField(max_length=255, blank=True, null=True)
+    dob=models.DateField()
+    primary_address=models.CharField(max_length=255,blank=True,null=True)
+    secondary_address=models.CharField(max_length=255,blank=True,null=True)
+    state= models.CharField(max_length=255, blank=True, null=True)
+    city=models.CharField(max_length=255,blank=True,null=True)
+    pin_code=models.IntegerField(blank=True,null=True)
     gmail = models.CharField(unique=True, max_length=100)
     password = models.CharField(max_length=255)
     phone_no = models.CharField(unique=True, max_length=15)

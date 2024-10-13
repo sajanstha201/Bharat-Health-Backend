@@ -11,3 +11,12 @@ class AppointmentSerializer(serializers.ModelSerializer):
         model=Appointments
         fields='__all__'
         
+class PatientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Patients
+        exclude=['password']
+        
+class DoctorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Doctors
+        exclude=['password']

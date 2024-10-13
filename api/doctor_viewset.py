@@ -8,6 +8,48 @@ from rest_framework.exceptions import ValidationError,NotFound
 from .serializer import *
 from .authentication import *
 from .permission import *
+
+class DoctorViewset(viewsets.ModelViewSet):
+    serializer_class = DoctorSerializer
+    authentication_classes = [DoctorTokenAuthentication]
+
+    def list(self, request, *args, **kwargs):
+        return Response({'error': 'unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    def get_object(self):
+        if not self.kwargs.get('pk'):
+            raise NotFound({'error': 'doctor id not found'})
+        return super().get_object()
+
+    def create(self, request):
+        data = request.data
+        serializer = self.get_serializer(data=data)
+        if not serializer.is_valid():
+            return Response({'error': 'invalid inputs'}, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)  # Use HTTP_201_CREATED for successful creation
+
+    def retrieve(self, request, *args, **kwargs):
+        doctor_id = kwargs.get('pk')
+        try:
+            doctor = Doctors.objects.get(doctor_id=doctor_id)
+            serializer = self.get_serializer(doctor)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Doctors.DoesNotExist:
+            return Response({'error': 'Doctor not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    def partial_update(self, request, *args, **kwargs):
+        doctor_id = kwargs.get('pk')
+        try:
+            doctor = Doctors.objects.get(doctor_id=doctor_id)
+            serializer = self.get_serializer(doctor, data=request.data, partial=True)
+            if not serializer.is_valid():
+                return Response({'error': 'not valid inputs'}, status=status.HTTP_400_BAD_REQUEST)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Doctors.DoesNotExist:
+            return Response({'error': 'Doctor not found'}, status=status.HTTP_404_NOT_FOUND)
+        
 class DoctorMedicalReportViewset(viewsets.ModelViewSet):
     queryset=MedicalPrescriptions.objects.all()
     serializer_class=MedicalReportSerializer

@@ -7,10 +7,13 @@ from .viewsets import *
 patient_router = DefaultRouter()
 patient_router.register(r'medical-report', PatientMedicalReportViewset, basename='medical-report')
 patient_router.register(r'appointments', PatientAppointmentViewset, basename='patient-appointment')
+patient_router.register(r'profile',PatientViewset,basename='profile')
 
 doctor_router = DefaultRouter()
 doctor_router.register(r'medical-report', DoctorMedicalReportViewset, basename='medical-report')
 doctor_router.register(r'appointments', DoctorAppointmentViewset, basename='doctor-appointment')
+doctor_router.register(r'profile',DoctorViewset,basename='profile')
+
 
 router = DefaultRouter()
 router.register(r'appointments', AppointmentViewset, basename='appointment')
