@@ -7,6 +7,8 @@ from rest_framework.decorators import authentication_classes
 from .serializer import *
 from .authentication import *
 from rest_framework.exceptions import NotFound
+import uuid
+from django.contrib.auth.hashers import make_password
 
 
 class PatientViewset(viewsets.ModelViewSet):
@@ -21,13 +23,23 @@ class PatientViewset(viewsets.ModelViewSet):
             return Patients.objects.get(patient_id=pk)
         except Patients.DoesNotExist:
             raise NotFound({'error': 'patient id not found'})
-
-    def create(self, request):
-        serializer = self.get_serializer(data=request.data)
+        
+    @action(methods=['POST'],detail=False,url_path='create',authentication_classes=[])
+    def createNewUser(self,request):
+        data=request.data
+        serializer = self.get_serializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response({'error': 'invalid inputs', 'details': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+    def create(self, request):
+        # serializer = self.get_serializer(data=request.data)
+        # if serializer.is_valid():
+        #     serializer.save()
+        #     return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response({'error':'not allowed'},status=status.HTTP_403_FORBIDDEN)
 
     def retrieve(self, request, *args, **kwargs):
         patient_id = kwargs.get('pk')
@@ -45,6 +57,11 @@ class PatientViewset(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response({'error': 'not valid inputs', 'details': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
     
+
+
+class PatientToViewDoctorViewset(viewsets.ModelViewSet):
+    serializer_class=PatientToViewDoctorSerializer
+    queryset=Doctors.objects.all()
     
 class PatientMedicalReportViewset(viewsets.ModelViewSet):
     serializer_class=MedicalReportSerializer
@@ -80,8 +97,8 @@ class PatientMedicalReportViewset(viewsets.ModelViewSet):
 class PatientAppointmentViewset(viewsets.ModelViewSet):
     serializer_class=AppointmentSerializer
     authentication_classes=[PatientTokenAuthentication]
-
-    def create(self,request):
+    
+    def post(self,request,*args,**kwargs):
         data=request.data
         serializers=self.get_serializer(data=data)
         if not serializers.is_valid():
@@ -93,15 +110,16 @@ class PatientAppointmentViewset(viewsets.ModelViewSet):
         patient_id=kwargs.get('pk')
         if not patient_id:
             return Response({'error':'patient id not included'},status=status.HTTP_400_BAD_REQUEST)
-        data=Appointments.objects.filter(patient_id=patient_id)
-        serializers=self.get_serializer(data,many=True)
+        data=Appointments.objects.filter(patient_id=patient_id).order_by('appointment_date','appointment_time')
+        if not data:
+            Response({'detail':'no appointment'},status=status.HTTP_404_NOT_FOUND)
+        serializers=PatientAppointmentWithDoctorDetailSerializer(data,many=True)
         return Response(serializers.data,status=status.HTTP_200_OK)
     
     def destroy(self, request, *args, **kwargs):
-        patient_id=kwargs.get('pk')
-        if not patient_id:
-            return Response({'error':'patient id not included'},status=status.HTTP_400_BAD_REQUEST)
-        appointment_id=request.data['appointment_id']
+        appointment_id=kwargs.get('pk')
+        if not appointment_id:
+            return Response({'error':'appointment id not included'},status=status.HTTP_400_BAD_REQUEST)
         appointment=Appointments.objects.get(appointment_id=appointment_id)
         appointment.delete()
         return Response({'success':'successfully deleted'},status=status.HTTP_200_OK)

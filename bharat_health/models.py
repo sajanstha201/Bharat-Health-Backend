@@ -141,7 +141,7 @@ class DjangoSession(models.Model):
 class Doctors(models.Model):
     doctor_id = models.AutoField(primary_key=True)
     first_name=models.CharField(max_length=100)
-    middle_name=models.CharField(max_length=100)
+    middle_name=models.CharField(max_length=100,blank=True)
     last_name=models.CharField(max_length=100)
     age = models.IntegerField(blank=True, null=True)
     sex = models.CharField(max_length=6)
@@ -154,7 +154,10 @@ class Doctors(models.Model):
     gmail = models.CharField(unique=True, max_length=100)
     password = models.CharField(max_length=255)
     phone_no = models.CharField(unique=True, max_length=15)
+    rating=models.IntegerField(default=0)
     token = models.CharField(max_length=255, unique=True, null=True, blank=True)
+    profile_image = models.ImageField(upload_to='doctor_images/', null=True, blank=True)
+    specialization=models.CharField(max_length=255,blank=True)
     class Meta:
         managed = False
         db_table = 'doctors'
@@ -189,7 +192,7 @@ class MedicalPrescriptions(models.Model):
 class Patients(models.Model):
     patient_id = models.AutoField(primary_key=True)
     first_name=models.CharField(max_length=100)
-    middle_name=models.CharField(max_length=100)
+    middle_name=models.CharField(max_length=100,blank=True)
     last_name=models.CharField(max_length=100)
     age = models.IntegerField(blank=True, null=True)
     sex = models.CharField(max_length=6)
@@ -206,7 +209,8 @@ class Patients(models.Model):
     class Meta:
         managed = False
         db_table = 'patients'
-
+    def __str__(self):
+        return f"Patient ID: {self.patient_id}, Name: {self.first_name} {self.middle_name} {self.last_name}, Email: {self.gmail},password:{self.password}"
 
 class TestLabs(models.Model):
     lab_id = models.AutoField(primary_key=True)

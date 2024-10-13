@@ -40,6 +40,7 @@ class DoctorViewset(viewsets.ModelViewSet):
 
     def partial_update(self, request, *args, **kwargs):
         doctor_id = kwargs.get('pk')
+        print(request.data)
         try:
             doctor = Doctors.objects.get(doctor_id=doctor_id)
             serializer = self.get_serializer(doctor, data=request.data, partial=True)
