@@ -52,11 +52,16 @@ class DoctorViewset(viewsets.ModelViewSet):
             return Response({'error': 'Doctor not found'}, status=status.HTTP_404_NOT_FOUND)
         
 class DoctorMedicalReportViewset(viewsets.ModelViewSet):
-    queryset=MedicalPrescriptions.objects.all()
     serializer_class=MedicalReportSerializer
     authentication_classes=[DoctorTokenAuthentication]
     permission_classes=[IsDoctorPermitted]
-    def list(self,request):
+    def get_queryset(self):
+        patient_id=self.request.query_params.get('patient_id')
+        if not patient_id:
+            return Response({'error':'patient id not included'},status=status.HTTP_400_BAD_REQUEST)
+        return MedicalPrescriptions.objects.filter(patient_id=patient_id)
+    
+    def retrieve(self,request,*args,**kwargs):
         try:
             patient_id=request.query_params.get('patient_id')
             if not patient_id:
@@ -66,10 +71,12 @@ class DoctorMedicalReportViewset(viewsets.ModelViewSet):
             return Response(serializer.data,status=status.HTTP_200_OK)
         except Exception as e:
             return Response(e,status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
-    def create(self,request,*args,**kwargs):
+
+    def post(self,request,*args,**kwargs):
         try:
-            medical_report_serializer=self.get_serializer(data=request.data)
+            print('creating a new user')
+            print(request.data)
+            medical_report_serializer=MedicalReportSerializer(data=request.data)
             if(medical_report_serializer.is_valid()):
                 medical_report_serializer.save()
                 return Response(medical_report_serializer.data,status=status.HTTP_200_OK)
@@ -77,6 +84,9 @@ class DoctorMedicalReportViewset(viewsets.ModelViewSet):
                 return Response({'error','invalid data'},status=status.HTTP_400_BAD_REQUEST)
         except Exception as error:
             return Response(error,status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    def list(self, request, *args, **kwargs):
+        return Response({'error':'unauthorized access'},status=status.HTTP_403_FORBIDDEN)
         
         
 class DoctorAppointmentViewset(viewsets.ModelViewSet):
@@ -96,7 +106,14 @@ class DoctorAppointmentViewset(viewsets.ModelViewSet):
         return super().get_object()
     
     def retrieve(self, request, *args, **kwargs):
-        data=self.get_queryset()
+        doctor_id=self.kwargs.get('pk')
+        appointment_status=request.query_params.get('status')
+        if appointment_status=='completed':
+            data=Appointments.objects.filter(doctor_id=doctor_id,appointment_status='completed').order_by('appointment_date','appointment_time')
+        elif appointment_status=='upcomming':
+            data=Appointments.objects.filter(doctor_id=doctor_id).exclude(appointment_status='completed').order_by('appointment_date','appointment_time')
+        else:
+            data=self.get_queryset()
         serializers=self.get_serializer(data,many=True)
         return Response(serializers.data,status=status.HTTP_200_OK)
     
@@ -115,3 +132,16 @@ class DoctorAppointmentViewset(viewsets.ModelViewSet):
         
     def list(self,request):
         return Response({'error': 'not valid'}, status=status.HTTP_401_UNAUTHORIZED)
+    
+class DoctorToViewPatientViewset(viewsets.ModelViewSet):
+    serializer_class=DoctorToViewPatientSerializer
+    authentication_classes=[DoctorTokenAuthentication]
+    def list(self, request, *args, **kwargs):
+        return Response({'error':'unauthorized'},status=status.HTTP_401_UNAUTHORIZED)
+    def retrieve(self, request, *args, **kwargs):
+        patient_id=kwargs.get('pk')
+        data=Patients.objects.filter(patient_id=patient_id)
+        if not data:
+            return Response({'error':'not found'},status=status.HTTP_404_NOT_FOUND)
+        serializers=DoctorToViewPatientSerializer(data,many=True)
+        return Response(serializers.data,status=status.HTTP_200_OK)

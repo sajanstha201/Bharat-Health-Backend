@@ -34,6 +34,10 @@ class PatientToViewDoctorSerializer(serializers.ModelSerializer):
         model=Doctors
         fields=['doctor_id','first_name','last_name','middle_name','sex','phone_no','gmail','rating','specialization','profile_image']
         
+class DoctorToViewPatientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Patients
+        fields=['first_name','middle_name','last_name','sex','age','phone_no','gmail','dob'] 
         
 class PatientAppointmentWithDoctorDetailSerializer(serializers.ModelSerializer):
     doctor = PatientToViewDoctorSerializer(read_only=True)  # Include doctor details
@@ -50,3 +54,9 @@ class PatientAppointmentWithDoctorDetailSerializer(serializers.ModelSerializer):
             'updated_at',
             'doctor'  # Added missing comma
         ]
+
+
+class PermissionPatientDoctorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=PermissionPatientDoctor
+        fields="__all__"

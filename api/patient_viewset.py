@@ -9,7 +9,7 @@ from .authentication import *
 from rest_framework.exceptions import NotFound
 import uuid
 from django.contrib.auth.hashers import make_password
-
+from django.utils import timezone
 
 class PatientViewset(viewsets.ModelViewSet):
     serializer_class = PatientSerializer
@@ -79,12 +79,28 @@ class PatientMedicalReportViewset(viewsets.ModelViewSet):
     
     def retrieve(self, request, *args, **kwargs):
         try:
-            medical_report=self.get_queryset()
+            starred_present=request.query_params.get('starred')
+            if starred_present:
+                medical_report=MedicalPrescriptions.objects.filter(patient_id=kwargs.get('pk'),starred=True)
+            else:
+                medical_report=self.get_queryset()
             medical_report_serializer=self.get_serializer(medical_report,many=True)
             return Response(medical_report_serializer.data,status=status.HTTP_200_OK)
         except Exception as error:
             return Response(error,status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
+    def partial_update(self, request, *args, **kwargs):
+        prescription_id=request.data.get('prescription_id')
+        if not prescription_id:
+            return Response({'error':'prescription_id not included'},status=status.HTTP_400_BAD_REQUEST)
+        prescription=MedicalPrescriptions.objects.get(prescription_id=prescription_id)
+        data=request.data
+        serializers=self.serializer_class(prescription,data=data,partial=True)
+        if not serializers.is_valid():
+            return Response({'error':'not valid input'},status=status.HTTP_400_BAD_REQUEST)
+        serializers.save()
+        return Response(serializers.data,status=status.HTTP_200_OK)
+    
     def destroy(self, request, *args, **kwargs):
         medical_prescription_id=request.data['prescription_id']
         if not medical_prescription_id:
@@ -101,6 +117,14 @@ class PatientAppointmentViewset(viewsets.ModelViewSet):
     def post(self,request,*args,**kwargs):
         data=request.data
         serializers=self.get_serializer(data=data)
+        print(data)
+        patient_id=data.get('patient')
+        doctor_id=data.get('doctor')
+        permission,created=PermissionPatientDoctor.objects.get_or_create(patient_id=patient_id,doctor_id=doctor_id)
+        permissionSerializer=PermissionPatientDoctorSerializer(permission,data={'is_allowed':True},partial=True)
+        if not permissionSerializer.is_valid():
+            return Response({'error':'error while giving permission'},status=status.HTTP_401_UNAUTHORIZED)
+        permissionSerializer.save()
         if not serializers.is_valid():
             return Response({'error':'invalid inputs'},status=status.HTTP_400_BAD_REQUEST)
         serializers.save()
@@ -108,9 +132,14 @@ class PatientAppointmentViewset(viewsets.ModelViewSet):
     
     def retrieve(self, request, *args, **kwargs):
         patient_id=kwargs.get('pk')
+        today=request.query_params.get('today')
+        today_date=timezone.now().date()
         if not patient_id:
             return Response({'error':'patient id not included'},status=status.HTTP_400_BAD_REQUEST)
-        data=Appointments.objects.filter(patient_id=patient_id).order_by('appointment_date','appointment_time')
+        if today:
+            data=Appointments.objects.filter(patient_id=patient_id,appointment_date=today_date)
+        else:
+            data=Appointments.objects.filter(patient_id=patient_id).order_by('appointment_date','appointment_time')
         if not data:
             Response({'detail':'no appointment'},status=status.HTTP_404_NOT_FOUND)
         serializers=PatientAppointmentWithDoctorDetailSerializer(data,many=True)

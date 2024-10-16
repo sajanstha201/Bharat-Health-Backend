@@ -5,9 +5,11 @@ class IsDoctorPermitted(BasePermission):
     def has_permission(self, request, view):
         try:
             patient_id=request.query_params.get('patient_id')
-            doctor_id=request.query_params.get('doctor_id')
-            if not patient_id or not doctor_id:
-                raise PermissionDenied("patient or doctor id not included")
+            doctor_id=view.kwargs.get('pk')
+            if not patient_id:
+                raise PermissionDenied("patient id not included")
+            if not doctor_id:
+                raise PermissionDenied("doctor id not included")
             permission=PermissionPatientDoctor.objects.filter(patient=patient_id,doctor=doctor_id).first()
             if permission is None:
                 raise PermissionDenied("invalid credientials")

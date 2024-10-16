@@ -183,7 +183,7 @@ class MedicalPrescriptions(models.Model):
     followup = models.TextField(blank=True, null=True)
     additional_info = models.TextField(blank=True, null=True)
     date = models.DateField()
-
+    starred=models.BooleanField(default=False)
     class Meta:
         managed = False
         db_table = 'medical_prescriptions'
