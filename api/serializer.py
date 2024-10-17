@@ -22,12 +22,16 @@ class PatientSerializer(serializers.ModelSerializer):
         unique_token=str(uuid.uuid4())
         validated_data['token']=unique_token
         validated_data['password'] = make_password(validated_data.get('password'))
-        print(validated_data)
         return super().create(validated_data)
 class DoctorSerializer(serializers.ModelSerializer):
     class Meta:
         model=Doctors
         exclude=['password']
+    def create(self, validated_data):
+        unique_token=str(uuid.uuid4())
+        validated_data['token']=unique_token
+        validated_data['password'] = make_password(validated_data.get('password'))
+        return super().create(validated_data)
         
 class PatientToViewDoctorSerializer(serializers.ModelSerializer):
     class Meta:
