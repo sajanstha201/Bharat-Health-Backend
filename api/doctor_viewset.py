@@ -8,7 +8,7 @@ from rest_framework.exceptions import ValidationError,NotFound
 from .serializer import *
 from .authentication import *
 from .permission import *
-
+from django.utils import timezone
 class DoctorViewset(viewsets.ModelViewSet):
     serializer_class = DoctorSerializer
     authentication_classes = [DoctorTokenAuthentication]
@@ -117,10 +117,13 @@ class DoctorAppointmentViewset(viewsets.ModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         doctor_id=self.kwargs.get('pk')
         appointment_status=request.query_params.get('status')
+        today_date=timezone.now().date()
         if appointment_status=='completed':
             data=Appointments.objects.filter(doctor_id=doctor_id,appointment_status='completed').order_by('appointment_date','appointment_time')
         elif appointment_status=='upcomming':
             data=Appointments.objects.filter(doctor_id=doctor_id).exclude(appointment_status='completed').order_by('appointment_date','appointment_time')
+        elif appointment_status=='today':
+            data=Appointments.objects.filter(doctor_id=doctor_id,appointment_date=today_date)
         else:
             data=self.get_queryset()
         serializers=self.get_serializer(data,many=True)

@@ -137,9 +137,10 @@ class PatientAppointmentViewset(viewsets.ModelViewSet):
         if not patient_id:
             return Response({'error':'patient id not included'},status=status.HTTP_400_BAD_REQUEST)
         if today:
-            data=Appointments.objects.filter(patient_id=patient_id,appointment_date=today_date)
+            print(today_date)
+            data=Appointments.objects.filter(patient_id=patient_id,appointment_date=today_date).order_by('-appointment_time')
         else:
-            data=Appointments.objects.filter(patient_id=patient_id).order_by('appointment_date','appointment_time')
+            data=Appointments.objects.filter(patient_id=patient_id).order_by('-appointment_date','-appointment_time')
         if not data:
             Response({'detail':'no appointment'},status=status.HTTP_404_NOT_FOUND)
         serializers=PatientAppointmentWithDoctorDetailSerializer(data,many=True)
