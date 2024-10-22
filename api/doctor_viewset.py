@@ -34,7 +34,7 @@ class DoctorViewset(viewsets.ModelViewSet):
         data=request.data
         serializer = self.get_serializer(data=data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(password=data['password'])
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response({'error': 'invalid inputs', 'details': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
     

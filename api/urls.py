@@ -18,10 +18,11 @@ doctor_router.register(r'profile',DoctorViewset,basename='profile')
 doctor_router.register(r'view-patients',DoctorToViewPatientViewset,basename='view-patient')
 
 router = DefaultRouter()
-router.register(r'appointments', AppointmentViewset, basename='appointment')
 
 urlpatterns = [
     path('patient/', include(patient_router.urls)),
     path('doctor/', include(doctor_router.urls)),
     path('', include(router.urls)),
+    path('get-user-info/',getUserInfo),
+    path('login/',loginUser),
 ]

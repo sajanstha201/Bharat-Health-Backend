@@ -21,8 +21,8 @@ class PatientSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         unique_token=str(uuid.uuid4())
         validated_data['token']=unique_token
-        validated_data['password'] = make_password(validated_data.get('password'))
         return super().create(validated_data)
+    
 class DoctorSerializer(serializers.ModelSerializer):
     class Meta:
         model=Doctors
@@ -30,7 +30,7 @@ class DoctorSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         unique_token=str(uuid.uuid4())
         validated_data['token']=unique_token
-        validated_data['password'] = make_password(validated_data.get('password'))
+
         return super().create(validated_data)
         
 class PatientToViewDoctorSerializer(serializers.ModelSerializer):
@@ -59,6 +59,11 @@ class PatientAppointmentWithDoctorDetailSerializer(serializers.ModelSerializer):
             'doctor'  # Added missing comma
         ]
 
+class PatientMedicalReportWithDoctorDetailSerializer(serializers.ModelSerializer):
+    doctor=PatientToViewDoctorSerializer(read_only=True)
+    class Meta:
+        model=MedicalPrescriptions
+        fields="__all__"
 
 class PermissionPatientDoctorSerializer(serializers.ModelSerializer):
     class Meta:

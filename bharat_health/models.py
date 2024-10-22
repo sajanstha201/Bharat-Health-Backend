@@ -152,7 +152,7 @@ class Doctors(models.Model):
     city=models.CharField(max_length=255,blank=True,null=True)
     pin_code=models.IntegerField(blank=True,null=True)
     gmail = models.CharField(unique=True, max_length=100)
-    password = models.CharField(max_length=255)
+    password = models.CharField(max_length=1000)
     phone_no = models.CharField(unique=True, max_length=15)
     rating=models.IntegerField(default=0)
     token = models.CharField(max_length=255, unique=True, null=True, blank=True)
@@ -203,7 +203,7 @@ class Patients(models.Model):
     city=models.CharField(max_length=255,blank=True,null=True)
     pin_code=models.IntegerField(blank=True,null=True)
     gmail = models.CharField(unique=True, max_length=100)
-    password = models.CharField(max_length=255)
+    password = models.CharField(max_length=1000)
     phone_no = models.CharField(unique=True, max_length=15)
     token = models.CharField(max_length=255, unique=True, null=True, blank=True)
     class Meta:
