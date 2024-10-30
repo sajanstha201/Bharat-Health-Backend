@@ -3,11 +3,18 @@ from rest_framework import serializers
 import uuid
 from django.contrib.auth.hashers import make_password
 
+class PatientToViewDoctorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Doctors
+        fields=['doctor_id','first_name','last_name','middle_name','sex','phone_no','gmail','rating','specialization','profile_image']
+        
 class MedicalReportSerializer(serializers.ModelSerializer):
+    doctor_detail=PatientToViewDoctorSerializer(source='doctor',read_only=True)
     class Meta:
         model=MedicalPrescriptions
         fields='__all__'
-        
+        extra_fields=['doctor_detail']
+  
         
 class AppointmentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -30,14 +37,11 @@ class DoctorSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         unique_token=str(uuid.uuid4())
         validated_data['token']=unique_token
-
         return super().create(validated_data)
-        
-class PatientToViewDoctorSerializer(serializers.ModelSerializer):
-    class Meta:
-        model=Doctors
-        fields=['doctor_id','first_name','last_name','middle_name','sex','phone_no','gmail','rating','specialization','profile_image']
-        
+    def update(self, instance, validated_data):
+        validated_data.pop('token', None)   
+        return super().update(instance, validated_data)    
+
 class DoctorToViewPatientSerializer(serializers.ModelSerializer):
     class Meta:
         model=Patients
@@ -58,7 +62,6 @@ class PatientAppointmentWithDoctorDetailSerializer(serializers.ModelSerializer):
             'updated_at',
             'doctor'  # Added missing comma
         ]
-
 class PatientMedicalReportWithDoctorDetailSerializer(serializers.ModelSerializer):
     doctor=PatientToViewDoctorSerializer(read_only=True)
     class Meta:

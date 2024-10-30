@@ -3,7 +3,6 @@ from django.urls import path, include
 from .patient_viewset import *
 from .doctor_viewset import *
 from .viewsets import *
-
 patient_router = DefaultRouter()
 patient_router.register(r'medical-report', PatientMedicalReportViewset, basename='patient-medical-report')
 patient_router.register(r'appointments', PatientAppointmentViewset, basename='patient-appointment')
@@ -25,4 +24,5 @@ urlpatterns = [
     path('', include(router.urls)),
     path('get-user-info/',getUserInfo),
     path('login/',loginUser),
+    path('get-disease/',predictDisease),
 ]

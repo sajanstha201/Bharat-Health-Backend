@@ -100,7 +100,7 @@ class PatientMedicalReportViewset(viewsets.ModelViewSet):
                 medical_report=MedicalPrescriptions.objects.filter(patient_id=kwargs.get('pk'),starred=True).order_by('-date')
             else:
                 medical_report=MedicalPrescriptions.objects.filter(patient_id=kwargs.get('pk')).order_by('-date')
-            medical_report_serializer=PatientMedicalReportWithDoctorDetailSerializer(medical_report,many=True)
+            medical_report_serializer=self.get_serializer(medical_report,many=True)
             return Response(medical_report_serializer.data,status=status.HTTP_200_OK)
         except Exception as error:
             return Response(error,status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -156,16 +156,18 @@ class PatientAppointmentViewset(viewsets.ModelViewSet):
             print(today_date)
             data=Appointments.objects.filter(patient_id=patient_id,appointment_date=today_date).annotate(
                 status_order=Case(
-                    When(appointment_status='completed',then=Value(0)),
-                    default=Value(1),
+                    When(appointment_status='completed',then=Value(1)),
+                    When(appointment_status='cancelled',then=Value(0)),
+                    default=Value(2),
                     output_field=IntegerField()
                 )
                 ).order_by('status_order','-appointment_time')
         else:
             data = Appointments.objects.filter(patient_id=patient_id).annotate(
                     status_order=Case(
-                        When(appointment_status='completed', then=Value(0)),
-                        default=Value(1),
+                        When(appointment_status='completed', then=Value(1)),
+                        When(appointment_status='cancelled',then=Value(0)),
+                        default=Value(2),
                         output_field=IntegerField()
                     )
                 ).order_by('-status_order', '-appointment_date', '-appointment_time')

@@ -38,7 +38,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'bharat_health',
-    'corsheaders'
+    'corsheaders',
+    'disease_prediction',
+    'api'
 ]
 
 MIDDLEWARE = [

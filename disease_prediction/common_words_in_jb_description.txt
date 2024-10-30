@@ -1,0 +1,6 @@
+company,qualification,responsibilities,environment,description,
+opportunity,job,summary,candidate,application,email,link,name,employee,general,talented,will,strong,closely,
+best,practise,maximum,device,use,system,similar,role,popular,excellent,effectively,specific,additional,
+saving,holiday,benefits,subject,necessary,objective,academic,basic,information,introduction,
+new,current,document,requirement,such,write,read,maintain,issue,manner,other,measure,provide,problem,solution,
+define,scope,goal,deliverable,change,need,finding,recommendation,overview,can,education,search,here,should,
